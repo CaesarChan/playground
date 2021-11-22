@@ -15,6 +15,8 @@ ARG GO_VERSION=go1.16
 ############################################################################
 # Build Go at GO_VERSION, and build faketime standard library.
 FROM debian:buster AS build-go
+ADD sources.list /etc/apt
+
 LABEL maintainer="golang-dev@googlegroups.com"
 
 ENV BUILD_DEPS 'curl git gcc patch libc6-dev ca-certificates'
@@ -42,17 +44,21 @@ ENV GOPROXY=https://proxy.golang.org
 
 # Compile Go at target version in /usr/local/go.
 WORKDIR /usr/local
-RUN git clone https://go.googlesource.com/go go && cd go && git reset --hard $GO_VERSION
+RUN git clone https://gitcode.net/mirrors/golang/go.git go && cd go && git reset --hard $GO_VERSION
 WORKDIR /usr/local/go/src
 RUN ./make.bash
 
 ############################################################################
 # Build playground web server.
 FROM debian:buster as build-playground
+ADD sources.list /etc/apt
 
 RUN apt-get update && apt-get install -y ca-certificates --no-install-recommends
 # Build playground from Go built at GO_VERSION.
 COPY --from=build-go /usr/local/go /usr/local/go
+
+ENV GO111MODULE=on
+ENV GOPROXY=https://goproxy.cn
 ENV GOROOT /usr/local/go
 ENV GOPATH /go
 ENV PATH="/go/bin:/usr/local/go/bin:${PATH}"
@@ -69,6 +75,7 @@ RUN go install
 ############################################################################
 # Final stage.
 FROM debian:buster
+ADD sources.list /etc/apt
 
 RUN apt-get update && apt-get install -y git ca-certificates --no-install-recommends
 
