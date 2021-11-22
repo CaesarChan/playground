@@ -6,6 +6,9 @@
 
 FROM golang:1.16 AS build
 
+ENV GO111MODULE=on
+ENV GOPROXY=https://goproxy.cn
+
 COPY go.mod /go/src/playground/go.mod
 COPY go.sum /go/src/playground/go.sum
 WORKDIR /go/src/playground
@@ -16,6 +19,8 @@ WORKDIR /go/src/playground/sandbox
 RUN go install
 
 FROM debian:buster
+ADD ../sources.list /etc/apt
+
 
 RUN apt-get update
 

@@ -83,6 +83,8 @@ RUN apt-get update && apt-get install -y git ca-certificates --no-install-recomm
 # is installed with -tags=faketime.
 COPY --from=build-go /usr/local/go /usr/local/go-faketime
 
+ENV GO111MODULE=on
+ENV GOPROXY=https://goproxy.cn
 ENV CGO_ENABLED 0
 ENV GOPATH /go
 ENV GOROOT /usr/local/go-faketime
